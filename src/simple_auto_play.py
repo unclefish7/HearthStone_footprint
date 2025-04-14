@@ -17,7 +17,7 @@ def get_image(source=None, region=None):
     return np.array(screenshot)
 
 # 平滑模拟鼠标移动 + 抖动 + 速度扰动
-def smooth_move_to(x, y, duration=None, steps=3):
+def smooth_move_to(x, y, duration=None, steps=1):
     duration = duration if duration is not None else random.uniform(0.1, 0.2)
     steps = steps if steps is not None else random.randint(18, 28)
     start_x, start_y = pyautogui.position()
@@ -53,22 +53,30 @@ def click(x, y):
 
 # 主循环逻辑
 def run_loop():
-    screen_w, screen_h = pyautogui.size()
 
     # 坐标配置
     start_button = (1870, 1177)
     confirm_button = (1291, 1135)
-    card_pos = (1225, 1321)
+    card_positions = [
+        (1100, 1321),
+        (1225, 1321),
+        (1350, 1321)
+    ]
     middle_pos = (602, 829)
     skill_pos = (1519, 1095)
     end_turn_pos = (2062, 659)
     click_anywhere = (974, 177)
+    own_minion_positions = [
+        (1130, 784),
+        (1400, 784),
+        (1250, 784)
+    ]
+    enemy_face = (1287, 277)
 
     while True:
         screenshot = get_image()
         img_gray = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
 
-        # 状态识别简化为图像中是否包含特定模板（需提前准备模板图）
         def has_template(filename, threshold=0.85):
             try:
                 path = os.path.join(ASSETS_DIR, filename)
@@ -88,10 +96,14 @@ def run_loop():
             click(*confirm_button)
 
         elif has_template("end_turn_button.png"):
-            print("游戏中：出牌 + 技能 + 结束回合")
-            click(*card_pos)
-            click(*middle_pos)
+            print("游戏中：打3张牌 + 技能 + 攻击 + 结束回合")
+            for pos in card_positions:
+                click(*pos)
+                click(*middle_pos)
             click(*skill_pos)
+            for attacker in own_minion_positions:
+                click(*attacker)
+                click(*enemy_face)
             click(*end_turn_pos)
 
         elif has_template("victory.png") or has_template("defeat.png"):
