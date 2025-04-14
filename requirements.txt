@@ -1,0 +1,17 @@
+# 图像处理和模板匹配
+opencv-python
+
+# 鼠标和键盘自动化操作
+pyautogui
+
+# 数学计算和数组处理
+numpy
+
+# 跨平台日志记录
+loguru
+
+# 测试框架
+pytest
+
+# 用于处理不同操作系统间路径问题
+pathlib2
