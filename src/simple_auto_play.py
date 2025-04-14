@@ -3,6 +3,11 @@ import numpy as np
 import pyautogui
 import time
 import random
+import os
+
+# 获取脚本所在路径
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ASSETS_DIR = os.path.join(BASE_DIR, "assets")
 
 # 获取屏幕截图
 def get_image(source=None, region=None):
@@ -38,6 +43,7 @@ def run_loop():
     start_button = (screen_w // 2, screen_h // 2 + 200)
     confirm_button = (screen_w // 2, screen_h // 2 + 250)
     card_pos = (screen_w // 2 - 300, screen_h - 150)
+    middle_pos = (screen_w // 2, screen_h // 2)
     skill_pos = (screen_w // 2 + 250, screen_h - 150)
     end_turn_pos = (screen_w - 180, screen_h // 2)
     click_anywhere = (screen_w // 2, screen_h // 2)
@@ -47,8 +53,9 @@ def run_loop():
         img_gray = cv2.cvtColor(screenshot, cv2.COLOR_BGR2GRAY)
 
         # 状态识别简化为图像中是否包含特定模板（需提前准备模板图）
-        def has_template(path, threshold=0.85):
+        def has_template(filename, threshold=0.85):
             try:
+                path = os.path.join(ASSETS_DIR, filename)
                 template = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
                 res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
                 loc = np.where(res >= threshold)
@@ -56,21 +63,22 @@ def run_loop():
             except:
                 return False
 
-        if has_template("assets/start_button.png"):
+        if has_template("start_button.png"):
             print("准备界面：点击开始")
             click(*start_button)
 
-        elif has_template("assets/confirm_button.png"):
+        elif has_template("confirm_button.png"):
             print("开始界面：点击确定")
             click(*confirm_button)
 
-        elif has_template("assets/end_turn_button.png"):
+        elif has_template("end_turn_button.png"):
             print("游戏中：出牌 + 技能 + 结束回合")
             click(*card_pos)
+            click(*middle_pos)
             click(*skill_pos)
             click(*end_turn_pos)
 
-        elif has_template("assets/victory.png") or has_template("assets/defeat.png"):
+        elif has_template("victory.png") or has_template("defeat.png"):
             print("游戏结束界面：点击任意位置返回")
             for _ in range(5):
                 click(*click_anywhere)
