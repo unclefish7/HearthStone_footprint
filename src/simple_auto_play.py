@@ -17,8 +17,8 @@ def get_image(source=None, region=None):
     return np.array(screenshot)
 
 # 平滑模拟鼠标移动 + 抖动 + 速度扰动
-def smooth_move_to(x, y, duration=None, steps=None):
-    duration = duration if duration is not None else random.uniform(0.3, 0.6)
+def smooth_move_to(x, y, duration=None, steps=3):
+    duration = duration if duration is not None else random.uniform(0.1, 0.2)
     steps = steps if steps is not None else random.randint(18, 28)
     start_x, start_y = pyautogui.position()
     for i in range(steps):
@@ -28,6 +28,22 @@ def smooth_move_to(x, y, duration=None, steps=None):
         pyautogui.moveTo(curr_x, curr_y)
         time.sleep(duration / steps)
     pyautogui.moveTo(x, y)
+
+# 慢速游走模拟（空闲状态）
+def idle_mouse_wiggle():
+    screen_w, screen_h = pyautogui.size()
+    center_x = screen_w // 2 + random.randint(-100, 100)
+    center_y = screen_h // 2 + random.randint(-100, 100)
+    duration = random.uniform(0.3, 0.6)
+    steps = random.randint(8, 12)
+    start_x, start_y = pyautogui.position()
+    for i in range(steps):
+        t = i / steps
+        x = int(start_x + (center_x - start_x) * t + random.randint(-2, 2))
+        y = int(start_y + (center_y - start_y) * t + random.randint(-2, 2))
+        pyautogui.moveTo(x, y)
+        time.sleep(duration / steps)
+    pyautogui.moveTo(center_x, center_y)
 
 # 点击指定坐标
 def click(x, y):
@@ -40,13 +56,13 @@ def run_loop():
     screen_w, screen_h = pyautogui.size()
 
     # 坐标配置
-    start_button = (screen_w // 2, screen_h // 2 + 200)
-    confirm_button = (screen_w // 2, screen_h // 2 + 250)
-    card_pos = (screen_w // 2 - 300, screen_h - 150)
-    middle_pos = (screen_w // 2, screen_h // 2)
-    skill_pos = (screen_w // 2 + 250, screen_h - 150)
-    end_turn_pos = (screen_w - 180, screen_h // 2)
-    click_anywhere = (screen_w // 2, screen_h // 2)
+    start_button = (1870, 1177)
+    confirm_button = (1291, 1135)
+    card_pos = (1225, 1321)
+    middle_pos = (602, 829)
+    skill_pos = (1519, 1095)
+    end_turn_pos = (2062, 659)
+    click_anywhere = (974, 177)
 
     while True:
         screenshot = get_image()
@@ -80,13 +96,14 @@ def run_loop():
 
         elif has_template("victory.png") or has_template("defeat.png"):
             print("游戏结束界面：点击任意位置返回")
-            for _ in range(5):
+            for _ in range(2):
                 click(*click_anywhere)
-                time.sleep(1)
+                time.sleep(2)
 
         else:
-            print("等待匹配中...")
-            time.sleep(2)
+            print("等待匹配...鼠标游走中")
+            idle_mouse_wiggle()
+            time.sleep(0.5)
 
 if __name__ == "__main__":
     run_loop()
